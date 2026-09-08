@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <title>Gastos · control mensual</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%92%B3%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div>
+          <h1>Gastos</h1>
+          <p class="brand-sub">Gastos e ingresos del mes</p>
+        </div>
+      </div>
+      <div class="month-nav" role="group" aria-label="Selección de mes">
+        <button id="prevMonth" class="icon-btn" type="button" aria-label="Mes anterior">‹</button>
+        <button id="monthLabel" class="month-label" type="button" aria-label="Ir al mes actual"></button>
+        <button id="nextMonth" class="icon-btn" type="button" aria-label="Mes siguiente">›</button>
+      </div>
+    </header>
+
+    <section class="stats" aria-label="Resumen del mes">
+      <article class="stat">
+        <span class="stat-key">Ingresos</span>
+        <span class="stat-val pos" id="statIncome">—</span>
+        <span class="stat-hint" id="statIncomeHint"></span>
+      </article>
+      <article class="stat">
+        <span class="stat-key">Gastos</span>
+        <span class="stat-val" id="statExpense">—</span>
+        <span class="stat-hint" id="statExpenseHint"></span>
+      </article>
+      <article class="stat">
+        <span class="stat-key">Balance</span>
+        <span class="stat-val" id="statBalance">—</span>
+        <span class="stat-hint" id="statBalanceHint"></span>
+      </article>
+      <article class="stat">
+        <span class="stat-key">Categoría principal</span>
+        <span class="stat-val" id="statTopCat">—</span>
+        <span class="stat-hint" id="statTopCatShare"></span>
+      </article>
+    </section>
+
+    <div class="grid">
+      <section class="card">
+        <div class="card-head">
+          <h2>Por categoría</h2>
+          <span class="card-note" id="donutTotalNote"></span>
+        </div>
+        <div class="donut-wrap">
+          <svg id="donut" viewBox="0 0 200 200" role="img" aria-label="Gráfico de gastos por categoría"></svg>
+          <div class="donut-center">
+            <span class="donut-center-val" id="donutCenter">—</span>
+            <span class="donut-center-key">este mes</span>
+          </div>
+        </div>
+        <ul class="legend" id="legend"></ul>
+      </section>
+
+      <section class="card">
+        <div class="card-head">
+          <h2>Por día</h2>
+          <span class="card-note" id="barsNote"></span>
+        </div>
+        <svg id="bars" viewBox="0 0 520 220" preserveAspectRatio="none" role="img" aria-label="Gráfico de gastos por día del mes"></svg>
+      </section>
+    </div>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Balance mensual</h2>
+        <span class="card-note" id="balanceNote"></span>
+      </div>
+      <svg id="balance" viewBox="0 0 720 240" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Gráfico de balance de los últimos meses"></svg>
+    </section>
+
+    <section class="card">
+      <div class="card-head">
+        <h2>Añadir movimiento</h2>
+      </div>
+      <div id="typeToggle" class="type-toggle" role="group" aria-label="Tipo de movimiento">
+        <button type="button" data-type="expense" aria-pressed="true">Gasto</button>
+        <button type="button" data-type="income" aria-pressed="false">Ingreso</button>
+      </div>
+      <form id="expenseForm" class="expense-form" autocomplete="off">
+        <div class="field field-amount">
+          <label for="amount" id="amountLabel">Importe</label>
+          <input id="amount" name="amount" type="text" inputmode="decimal" autocomplete="off" placeholder="0,00" required />
+        </div>
+        <div class="field field-cat">
+          <label for="category">Categoría</label>
+          <input id="category" name="category" list="categoryList" placeholder="Comida" required />
+          <datalist id="categoryList"></datalist>
+        </div>
+        <div class="field field-note">
+          <label for="note">Descripción <span class="opt">(opcional)</span></label>
+          <input id="note" name="note" type="text" maxlength="80" placeholder="Compra semanal" />
+        </div>
+        <div class="field field-date">
+          <label for="date">Fecha</label>
+          <input id="date" name="date" type="date" required />
+        </div>
+        <button type="submit" class="primary-btn" id="submitBtn">Añadir gasto</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <div class="card-head list-head">
+        <h2>Movimientos <span class="count-pill" id="listCount">0</span></h2>
+        <div class="list-actions">
+          <button id="exportBtn" class="ghost-btn" type="button">Exportar CSV</button>
+          <button id="clearBtn" class="ghost-btn danger" type="button">Vaciar mes</button>
+        </div>
+      </div>
+
+      <div class="filters" id="filters" role="group" aria-label="Filtrar por categoría"></div>
+
+      <div class="table-wrap">
+        <table class="expense-table">
+          <thead>
+            <tr>
+              <th scope="col">Fecha</th>
+              <th scope="col">Categoría</th>
+              <th scope="col">Descripción</th>
+              <th scope="col" class="num">Importe</th>
+              <th scope="col"><span class="sr-only">Acciones</span></th>
+            </tr>
+          </thead>
+          <tbody id="expenseRows"></tbody>
+        </table>
+        <p class="empty" id="emptyState" hidden>Sin movimientos que mostrar. Añade el primero arriba.</p>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <span>Los datos se guardan solo en este navegador (localStorage).</span>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
